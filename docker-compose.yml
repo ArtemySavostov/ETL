@@ -5,16 +5,16 @@ services:
     shm_size: "256mb"
     command: ["postgres", "-c", "max_parallel_workers_per_gather=0", "-c", "max_parallel_workers=0"]
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: secret
-      POSTGRES_DB: shop
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5433:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data   
       - ./init/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d shop"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -38,14 +38,14 @@ services:
       dockerfile: etl_service/Dockerfile
     container_name: etl_service
     environment:
-      PG_HOST: postgres
-      PG_PORT: 5432
-      PG_DB: shop
-      PG_USER: admin
-      PG_PASSWORD: secret
-      MONGO_URI: mongodb://mongodb:27017/
-      MONGO_DB: replica_db
-      CRON_SCHEDULE: "*/1 * * * *"
+      PG_HOST: ${PG_HOST}
+      PG_PORT: ${PG_PORT}
+      PG_DB: ${PG_DB}
+      PG_USER: ${POSTGRES_USER}
+      PG_PASSWORD: ${POSTGRES_PASSWORD}
+      MONGO_URI: ${MONGO_URI}
+      MONGO_DB: ${MONGO_DB}
+      CRON_SCHEDULE: ${CRON_SCHEDULE}
     depends_on:
       postgres:
         condition: service_healthy
